@@ -44,3 +44,6 @@ class Vector2:
     def __iter__(self):
         yield self.x
         yield self.y
+
+    def dot_product(self, other: 'Vector2') -> float:
+        return self.x * other.x + self.y * other.y

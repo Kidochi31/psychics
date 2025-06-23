@@ -8,7 +8,7 @@ from psychics import Circle, Line, AABB
 from collisions import collides
 from vector2 import Vector2
 from random import randint, random
-from rigidbody import Rigidbody
+from rigidbody import Rigidbody, resolve_rigidbody_line_collision
 
 
 def main():
@@ -16,6 +16,7 @@ def main():
     dt = 0
     clock = pygame.time.Clock()
     omnomnom = Sound("omnomnom.wav")
+    hibaby = Sound("hibaby.wav")
     selected_image = pygame.image.load("omnomnom.png")
 
     # Set up the drawing window
@@ -23,10 +24,9 @@ def main():
     aabb = AABB((-screen.get_width()//2, screen.get_height()//2), (screen.get_width()//2, -screen.get_height()//2))
 
     circles : list[Circle] = [Circle((0, 0), 50), Circle((300, -300), 75)]
-    lines: list[Line] = [Line((0,0), 0), Line((0,0), math.pi/2)]
-    rigidbodies : list[Rigidbody] = [Rigidbody(circles[0], Vector2(0, -5))]
-    
-    selected_circle : int = 0
+    lines: list[Line] = [Line((0, -200), math.pi/6), Line((0, -200), 5 * math.pi/6)]
+    collider_lines: list[Line] = lines
+    rigidbodies : list[Rigidbody] = [Rigidbody(circles[0], Vector2(0, -100)), Rigidbody(circles[1], Vector2(0, -100))]
 
     # Run until the user asks to quit
     running = True
@@ -37,49 +37,38 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    selected_circle += 1
-                    if selected_circle >= len(circles):
-                        selected_circle = 0
                 if event.key == pygame.K_a:
-                    circles.append(Circle(Vector2(randint(-screen.get_width()//2, screen.get_width()//2), randint(-screen.get_height()//2, screen.get_height()//2)), randint(10, 100)))
+                    circle = Circle(Vector2(randint(-screen.get_width()//2, screen.get_width()//2), randint(-screen.get_height()//2, screen.get_height()//2)), randint(10, 100))
+                    circles.append(circle)
+                    rigidbodies.append(Rigidbody(circle, Vector2(0, -100)))
+                    omnomnom.play()
                 if event.key == pygame.K_l:
                     lines.append(Line(Vector2(randint(-screen.get_width()//2, screen.get_width()//2), randint(-screen.get_height(), screen.get_height()//2)), random() * math.pi))
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:
-            circles[selected_circle].position += Vector2(0,200) * dt
-        if keys[pygame.K_DOWN]:
-            circles[selected_circle].position += Vector2(0,-200) * dt
-        if keys[pygame.K_RIGHT]:
-            circles[selected_circle].position += Vector2(200,0) * dt
-        if keys[pygame.K_LEFT]:
-            circles[selected_circle].position += Vector2(-200,0) * dt
+        # keys = pygame.key.get_pressed()
+        # if keys[pygame.K_UP]:
+        #     circles[selected_circle].position += Vector2(0,200) * dt
+        # if keys[pygame.K_DOWN]:
+        #     circles[selected_circle].position += Vector2(0,-200) * dt
+        # if keys[pygame.K_RIGHT]:
+        #     circles[selected_circle].position += Vector2(200,0) * dt
+        # if keys[pygame.K_LEFT]:
+        #     circles[selected_circle].position += Vector2(-200,0) * dt
         
         for rigidbody in rigidbodies:
             rigidbody.timestep(dt)
+
+        resolve_rigidbody_line_collision(rigidbodies, collider_lines)
 
         # Fill the background with white
         screen.fill((255, 255, 255))
 
         # Draw a solid blue circle in the center
         for _, circle in enumerate(list(circles)):
-            if circle == circles[selected_circle]:
-                draw_image_to_circle(screen, circle, selected_image)
-            elif collides(circle, circles[selected_circle]):
-                # circles.remove(circle)
-                # if k < selected_circle:
-                #     selected_circle -= 1
-                # circles[selected_circle].add_area(circle.area())
-                # omnomnom.play()
-                draw_circle(screen, circle, Color(255, 0, 0))
-            else:
-                draw_circle(screen, circle, Color(0, 0, 255))
+            draw_image_to_circle(screen, circle, selected_image)
 
         for line in lines:
-            if collides(circles[selected_circle], line):
-                draw_line(screen, line, Color(255,0,0), aabb)
-            else:
-                draw_line(screen, line, Color(0,0,0), aabb)
+            draw_line(screen, line, Color(0,0,0), aabb)
+                
 
         # Flip the display
         pygame.display.flip()
