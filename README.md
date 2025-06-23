@@ -1,1 +1,1 @@
-'pyshics' 
+'psychics' 
