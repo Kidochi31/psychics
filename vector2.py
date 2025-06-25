@@ -14,7 +14,7 @@ class Vector2:
     def __mul__(self, other: float) -> 'Vector2':
         return Vector2(self.x * other, self.y * other)
     
-    def __div__(self, other: float) -> 'Vector2':
+    def __truediv__(self, other: float) -> 'Vector2':
         return Vector2(self.x / other, self.y / other)
 
     def __add__(self, other: 'Vector2') -> 'Vector2':
