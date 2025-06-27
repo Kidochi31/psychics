@@ -47,3 +47,9 @@ class Vector2:
 
     def dot_product(self, other: 'Vector2') -> float:
         return self.x * other.x + self.y * other.y
+    
+    def normalised(self) -> 'Vector2':
+        magnitude = sqrt(self.x * self.x + self.y * self.y)
+        if magnitude == 0:
+            return Vector2(0, 0)
+        return Vector2(self.x / magnitude, self.y / magnitude)
